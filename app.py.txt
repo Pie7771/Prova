@@ -1,0 +1,97 @@
+import pandas as pd
+from datetime import datetime
+from PIL import Image
+
+# Configurazione della pagina
+st.set_page_config(
+    page_title="PZ Fisio - Gestione Pazienti",
+    page_icon="💪",
+    layout="wide"
+)
+
+# Inizializzazione dello stato della sessione per l'autenticazione
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+# Funzione di Login semplice
+def login():
+    st.title("🔐 Accesso - PZ Fisio")
+    st.write("Inserisci le credenziali per accedere al gestionale.")
+    
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    
+    if st.button("Accedi"):
+        # Credenziali di esempio (puoi modificarle come preferisci)
+        if username == "admin" and password == "fisio2026":
+            st.session_state.authenticated = True
+            st.success("Accesso effettuato con successo!")
+            st.rerun()
+        else:
+            st.error("Username o password errati.")
+
+# Funzione principale dell'applicazione
+def main_app():
+    st.sidebar.title("PZ Fisio 🏥")
+    menu = st.sidebar.selectbox("Navigazione", ["Dashboard", "Gestione Pazienti", "Nuova Visita", "Impostazioni"])
+    
+    if st.sidebar.button("Esci (Logout)"):
+        st.session_state.authenticated = False
+        st.rerun()
+
+    if menu == "Dashboard":
+        st.title("📊 Dashboard")
+        st.write("Benvenuto nel gestionale PZ Fisio!")
+        
+        # Metriche di esempio
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Pazienti Totali", "24", "+2 questo mese")
+        with col2:
+            st.metric("Visite questa settimana", "8", "-1 rispetto a ieri")
+        with col3:
+            st.metric("Incasso Stimato", "€ 1.250", "+15%")
+            
+        st.divider()
+        st.info("Seleziona una voce dal menu laterale per gestire i pazienti o aggiungere una nuova visita.")
+
+    elif menu == "Gestione Pazienti":
+        st.title("👥 Elenco Pazienti")
+        st.write("Qui puoi visualizzare e cercare i pazienti registrati.")
+        
+        # Tabella di esempio
+        data = {
+            "Nome": ["Mario Rossi", "Giulia Bianchi", "Luca Verdi"],
+            "Età": [34, 42, 29],
+            "Patologia / Trattamento": ["Lombalgia acuta", "Riabilitazione spalla", "Distorsione caviglia"],
+            "Ultima Seduta": ["2026-10-20", "2026-10-25", "2026-10-27"]
+        }
+        df = pd.DataFrame(data)
+        st.dataframe(df, use_container_width=True)
+
+    elif menu == "Nuova Visita":
+        st.title("➕ Registra Nuova Visita")
+        with st.form("form_visita"):
+            paziente = st.text_input("Nome e Cognome Paziente")
+            data_visita = st.date_input("Data della seduta", datetime.today())
+            note = st.text_area("Note cliniche ed esercizi assegnati")
+            
+            submitted = st.form_submit_button("Salva Visita")
+            if submitted:
+                if paziente:
+                    st.success(f"Visita per {paziente} salvata con successo!")
+                else:
+                    st.error("Inserisci almeno il nome del paziente.")
+
+    elif menu == "Impostazioni":
+        st.title("⚙️ Impostazioni")
+        st.write("Configurazioni dell'applicazione PZ Fisio.")
+        st.text_input("Nome Studio", "Studio Fisioterapia PZ")
+        st.text_input("Email di contatto", "info@pzfisio.it")
+        st.button("Salva modifiche")
+
+# Controllo del flusso di autenticazione
+if not st.session_state.authenticated:
+    login()
+else:
+    main_app()
